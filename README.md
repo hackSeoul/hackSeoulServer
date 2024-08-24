@@ -1,2 +1,2 @@
-# hackSeoulServer
- 
+# server
+HackSeoul Server
