@@ -2,6 +2,7 @@ package com.hackseoul.controller;
 
 import com.hackseoul.apiPayload.ApiResponse;
 import com.hackseoul.dto.PlantIdentificationRequest;
+import com.hackseoul.dto.PlantResponse;
 import com.hackseoul.service.PlantService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +23,11 @@ public class PlantController {
     private final PlantService plantService;
 
     @PostMapping("/identify")
-    @Operation(summary = "식물 병 판별 API입니다.", description = "이미지를 통해 식물을 판별하고 해당 식물이 병들었는지 여부를 반환합니다.")
-    public ApiResponse<String> identifyPlant(@Valid @RequestBody PlantIdentificationRequest request){
+    @Operation(summary = "식물 판별 API입니다.", description = "이미지를 통해 식물을 판별하고 해당 식물이 병들었는지 여부를 반환합니다.")
+    public ApiResponse<PlantResponse.plantInfoDTO> identifyPlant(@Valid @RequestBody PlantIdentificationRequest request){
+        PlantResponse.plantInfoDTO plantInfoDTO = plantService.identifyPlant(request);
 
-
-        plantService.getPlantDisease(request);
-        return ApiResponse.onSuccess("성공입니다.");
+        return ApiResponse.onSuccess(plantInfoDTO);
     }
+
 }
