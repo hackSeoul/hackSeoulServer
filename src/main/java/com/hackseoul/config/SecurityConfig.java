@@ -55,6 +55,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedOrigin("https://43.203.235.174:8080"); //프론트도 추가해야함
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");

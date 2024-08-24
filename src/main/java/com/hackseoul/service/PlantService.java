@@ -1,9 +1,11 @@
 package com.hackseoul.service;
 
+import com.hackseoul.domain.Plant;
 import com.hackseoul.dto.PlantDiseaseResponse;
-import com.hackseoul.dto.PlantIdentificationRequest;
+import com.hackseoul.dto.PlantRequest;
 import com.hackseoul.dto.PlantResponse;
 import com.hackseoul.dto.PlantInformationResponse;
+import com.hackseoul.repository.PlantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,23 +24,58 @@ import java.util.Map;
 public class PlantService {
 
     private final RestTemplate restTemplate;
+    private final PlantRepository plantRepository;
 
+    public PlantResponse.plantSpecificInfoDTO savePlant(PlantRequest.PlantSaveDTO request){
+        // 닉네임 null값 확인
+        String nickName = request.getNickName()!=null ? request.getNickName() : "익명의 새싹";
 
-    public PlantResponse.plantInfoDTO identifyPlant(PlantIdentificationRequest request){
-        PlantInformationResponse plantInformation = getPlantInformation(request);
-        PlantDiseaseResponse plantDisease = getPlantDisease(request);
+        // 식물 이름 알아내기
+        PlantResponse.plantBasicInfo plantBasicInfo = identifyPlant(request.getImageData());
 
-        PlantResponse.plantInfoDTO plantInfoDTO = PlantResponse.plantInfoDTO.builder()
+        Plant plant = Plant.builder()
+                .nickName(nickName)
+                .longitude(request.getLongitude())
+                .latitude(request.getLantitude())
+                .plantName("개나리")
+                .plantDescription("개나리는 쏼라쏼라")
+                .disease("병명1")
+                .isPlant(plantBasicInfo.isPlant())
+                .isHealthy(plantBasicInfo.isHealthy())
+                .imageDirectory(request.getImageDirectory())
+                .build();
+
+        plantRepository.save(plant);
+
+        return PlantResponse.plantSpecificInfoDTO.builder()
+                .isPlant(plant.isPlant())
+                .plantName(plant.getPlantName())
+                .plantDescription(plant.getPlantDescription())
+                .disease(plant.getDisease())
+                .isHealthy(plant.isHealthy())
+                .latitude(plant.getLatitude())
+                .longitude(plant.getLongitude())
+                .nickName(plant.getNickName())
+                .imageDirectory(plant.getImageDirectory())
+                .build();
+
+    }
+
+    public PlantResponse.plantBasicInfo identifyPlant(String imageData){
+        PlantInformationResponse plantInformation = getPlantInformation(imageData);
+        PlantDiseaseResponse plantDisease = getPlantDisease(imageData);
+
+        PlantResponse.plantBasicInfo plantBasicInfo = PlantResponse.plantBasicInfo.builder()
                 .isPlant(plantInformation.getResult().getIs_plant().isBinary())
                 .plantName("스노우플라워")
                 .plantDescription("쏼라쏼라")
                 .isHealthy(plantDisease.getResult().getIs_healthy().isBinary())
                 .build();
 
-        return plantInfoDTO;
+        return plantBasicInfo;
     }
 
-    public PlantInformationResponse getPlantInformation(PlantIdentificationRequest request) {
+    public PlantInformationResponse getPlantInformation(String imageData) {
         String url = "https://plant.id/api/v3/identification";
 
         // 올바른 HttpHeaders 임포트
@@ -48,7 +85,7 @@ public class PlantService {
 
         // 요청 Body 설정
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("images", new String[]{request.getImageData()});
+        requestBody.put("images", new String[]{imageData});
         requestBody.put("similar_images", true);
 
         // HttpEntity 생성
@@ -77,7 +114,7 @@ public class PlantService {
         }
     }
 
-    public PlantDiseaseResponse getPlantDisease(PlantIdentificationRequest request) {
+    public PlantDiseaseResponse getPlantDisease(String imageData) {
         String url = "https://plant.id/api/v3/health_assessment";
 
         // 올바른 HttpHeaders 임포트
@@ -87,7 +124,7 @@ public class PlantService {
 
         // 요청 Body 설정
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("images", new String[]{request.getImageData()});
+        requestBody.put("images", new String[]{imageData});
         requestBody.put("similar_images", true);
 
         // HttpEntity 생성
