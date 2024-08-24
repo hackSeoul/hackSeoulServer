@@ -24,7 +24,7 @@ public class JWTExceptionHandlerFilter extends OncePerRequestFilter {
                 setErrorResponse(response, ErrorStatus.TOKEN_EXPIRED);
             } else if (Objects.equals(e.getMessage(), "Token null")) {
                 setErrorResponse(response, ErrorStatus.TOKEN_NULL);
-            } else if (Objects.equals(e.getMessage(), "No Member")) {
+            } else if (Objects.equals(e.getMessage(), "No Plant")) {
                 setErrorResponse(response, ErrorStatus.MEMBER_NOT_FOUND);
             } else {
                 setErrorResponse(response, ErrorStatus.INVALID_TOKEN);
