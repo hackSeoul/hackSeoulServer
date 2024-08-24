@@ -3,6 +3,8 @@ package com.hackseoul.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 public class PlantResponse {
     @Builder
     @Getter
@@ -19,6 +21,7 @@ public class PlantResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class plantSpecificInfoDTO{
+        private Long id;
         private String nickName;
         private String plantName;
         private String plantDescription;
@@ -29,5 +32,25 @@ public class PlantResponse {
         private double longitude;
         private double latitude;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class plantListDTO{
+        private List<plantSimpleDTO> plantListsDTO;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class plantSimpleDTO{
+        private Long id;
+        private double longitude;
+        private double latitude;
+
+    }
+
 
 }
