@@ -42,6 +42,7 @@ public class PlantService {
                 .disease("병명1")
                 .isPlant(plantBasicInfo.isPlant())
                 .isHealthy(plantBasicInfo.isHealthy())
+                .imageDirectory(request.getImageDirectory())
                 .build();
 
         plantRepository.save(plant);
@@ -55,6 +56,7 @@ public class PlantService {
                 .latitude(plant.getLatitude())
                 .longitude(plant.getLongitude())
                 .nickName(plant.getNickName())
+                .imageDirectory(plant.getImageDirectory())
                 .build();
 
     }

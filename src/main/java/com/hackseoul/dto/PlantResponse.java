@@ -25,6 +25,7 @@ public class PlantResponse {
         private boolean isPlant;
         private boolean isHealthy;
         private String disease;
+        private String imageDirectory;
         private double longitude;
         private double latitude;
     }

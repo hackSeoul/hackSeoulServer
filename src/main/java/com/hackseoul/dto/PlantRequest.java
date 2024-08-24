@@ -22,6 +22,7 @@ public class PlantRequest {
         private double longitude;
         @NotNull(message = "위도 값은 필수입니다.")
         private double lantitude;
+        private String imageDirectory;
     }
 }
 

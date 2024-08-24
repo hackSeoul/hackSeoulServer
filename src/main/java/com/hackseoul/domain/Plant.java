@@ -42,5 +42,8 @@ public class Plant extends BaseDateTimeEntity {
     @Column(name = "disease")
     private String disease;
 
+    @Column(name = "imageDirectory")
+    private String imageDirectory;
+
 }
 
