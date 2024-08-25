@@ -1,5 +1,7 @@
 package com.hackseoul.service;
 
+import com.hackseoul.apiPayload.code.status.ErrorStatus;
+import com.hackseoul.apiPayload.exception.handler.PlantHandler;
 import com.hackseoul.domain.Plant;
 import com.hackseoul.dto.PlantDiseaseResponse;
 import com.hackseoul.dto.PlantRequest;
@@ -16,8 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +30,71 @@ public class PlantService {
 
     private final RestTemplate restTemplate;
     private final PlantRepository plantRepository;
+    private final FileService fileService;
 
-    public PlantResponse.plantSpecificInfoDTO savePlant(PlantRequest.PlantSaveDTO request){
+    public List<PlantResponse.plantSimpleDTO> getEntireList(){
+        List<PlantResponse.plantSimpleDTO> plantSimpleDTOList = plantRepository.findAll().stream()
+                .map(plant -> PlantResponse.plantSimpleDTO.builder()
+                        .id(plant.getId())
+                        .longitude(plant.getLongitude())
+                        .latitude(plant.getLatitude())
+                        .build())
+                .collect(Collectors.toList());
+        return plantSimpleDTOList;
+
+    }
+
+    public List<PlantResponse.plantSpecificInfoDTO> getPlantListWithNickName(String nickname){
+        List<PlantResponse.plantSpecificInfoDTO> plantSpecificInfoDTOList = plantRepository.findAllByNickName(nickname).stream()
+                .map(plant -> PlantResponse.plantSpecificInfoDTO.builder()
+                        .id(plant.getId())
+                        .plantDescription(plant.getPlantDescription())
+                        .plantName(plant.getPlantName())
+                        .disease(plant.getDisease())
+                        .nickName(plant.getNickName())
+                        .imageDirectory(plant.getImageDirectory())
+                        .isPlant(plant.isPlant())
+                        .isHealthy(plant.isHealthy())
+                        .longitude(plant.getLongitude())
+                        .latitude(plant.getLatitude())
+                        .build())
+                .collect(Collectors.toList());
+        return plantSpecificInfoDTOList;
+
+    }
+
+    public PlantResponse.plantNameListDTO getPlantNameList(double latitude, double longitude) {
+        double latitudeMin = latitude - 0.0045;
+        double latitudeMax = latitude + 0.0045;
+        double longitudeMin = longitude - 0.0055;
+        double longitudeMax = longitude + 0.0055;
+
+        // 위도와 경도 범위 내의 식물 데이터를 검색
+        List<Plant> plants = plantRepository.findAllByLatitudeAndLongitudeRange(latitudeMin, latitudeMax, longitudeMin, longitudeMax);
+
+        /// PlantName으로 그룹화하여 plantNameDTO 생성
+        Map<String, List<PlantResponse.plantSimpleDTO>> plantsGroupedByPlantName = plants.stream()
+                .collect(Collectors.groupingBy(
+                        Plant::getPlantName,
+                        Collectors.mapping(
+                                plant -> new PlantResponse.plantSimpleDTO(plant.getId(), plant.getLongitude(), plant.getLatitude()),
+                                Collectors.toList()
+                        )
+                ));
+
+        // 그룹화된 데이터를 기반으로 plantNameDTO 리스트 생성
+        List<PlantResponse.plantNameDTO> plantNameDTOList = plantsGroupedByPlantName.entrySet().stream()
+                .map(entry -> new PlantResponse.plantNameDTO(
+                        entry.getKey(),
+                        entry.getValue()  // SimpleDTO 리스트를 plantListsDTO에 직접 담음
+                ))
+                .collect(Collectors.toList());
+
+        // 최종적으로 PlantNameListDTO 생성 및 반환
+        return new PlantResponse.plantNameListDTO(plantNameDTOList.size(), plantNameDTOList);
+    }
+
+    public PlantResponse.plantSpecificInfoDTO savePlant(PlantRequest.PlantSaveDTO request) throws IOException {
         // 닉네임 null값 확인
         String nickName = request.getNickName()!=null ? request.getNickName() : "익명의 새싹";
 
@@ -36,7 +104,7 @@ public class PlantService {
         Plant plant = Plant.builder()
                 .nickName(nickName)
                 .longitude(request.getLongitude())
-                .latitude(request.getLantitude())
+                .latitude(request.getLatitude())
                 .plantName("개나리")
                 .plantDescription("개나리는 쏼라쏼라")
                 .disease("병명1")
@@ -45,9 +113,13 @@ public class PlantService {
                 .imageDirectory(request.getImageDirectory())
                 .build();
 
+
         plantRepository.save(plant);
 
+//        String s = fileService.saveBase64File(request.getImageData(), nickName);
+
         return PlantResponse.plantSpecificInfoDTO.builder()
+                .id(plant.getId())
                 .isPlant(plant.isPlant())
                 .plantName(plant.getPlantName())
                 .plantDescription(plant.getPlantDescription())
@@ -80,7 +152,7 @@ public class PlantService {
 
         // 올바른 HttpHeaders 임포트
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Api-Key", "IbarnlEs3XQe0t5SNWNhVJsZOL6WTJpgAfJVWVJku3rdgsuyh0");  // 필요시 Authorization 헤더 설정
+        headers.set("Api-Key", "LIKiNOCxVUnZrFjQvx35Ao3xkWQbxaam6dduHaP64l7iKmb6fM");  // 필요시 Authorization 헤더 설정
         headers.set("Content-Type", "application/json");
 
         // 요청 Body 설정
@@ -119,7 +191,7 @@ public class PlantService {
 
         // 올바른 HttpHeaders 임포트
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Api-Key", "IbarnlEs3XQe0t5SNWNhVJsZOL6WTJpgAfJVWVJku3rdgsuyh0");  // 필요시 Authorization 헤더 설정
+        headers.set("Api-Key", "LIKiNOCxVUnZrFjQvx35Ao3xkWQbxaam6dduHaP64l7iKmb6fM");  // 필요시 Authorization 헤더 설정
         headers.set("Content-Type", "application/json");
 
         // 요청 Body 설정
@@ -151,6 +223,26 @@ public class PlantService {
             System.out.println("Error: " + e.getMessage());
             return null;
         }
+    }
+
+    public PlantResponse.plantSpecificInfoDTO getSpecificPlant(Long id){
+        Plant plant = plantRepository.findById(id)
+                .orElseThrow(() -> new PlantHandler(ErrorStatus.PLANT_NOT_FOUND));
+
+
+
+        return PlantResponse.plantSpecificInfoDTO.builder()
+                .id(plant.getId())
+                .imageDirectory(plant.getImageDirectory())
+                .disease(plant.getDisease())
+                .nickName(plant.getNickName())
+                .latitude(plant.getLatitude())
+                .longitude(plant.getLongitude())
+                .plantDescription(plant.getPlantDescription())
+                .plantName(plant.getPlantName())
+                .isPlant(plant.isPlant())
+                .isHealthy(plant.isHealthy())
+                .build();
     }
 }
 
