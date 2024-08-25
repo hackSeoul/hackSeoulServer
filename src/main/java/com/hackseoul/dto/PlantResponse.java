@@ -4,6 +4,7 @@ package com.hackseoul.dto;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 public class PlantResponse {
     @Builder
@@ -40,6 +41,25 @@ public class PlantResponse {
     public static class plantListDTO{
         private List<plantSimpleDTO> plantListsDTO;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class plantNameListDTO{
+        private int count;
+        private List<plantNameDTO> plantNameListDTO;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class plantNameDTO{
+        String plantName;
+        plantListDTO plantListDTO;
+    }
+
 
     @Builder
     @Getter

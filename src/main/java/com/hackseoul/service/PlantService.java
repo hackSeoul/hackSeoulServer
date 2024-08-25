@@ -63,6 +63,37 @@ public class PlantService {
 
     }
 
+    public PlantResponse.plantNameListDTO getPlantNameList(double latitude, double longitude) {
+        double latitudeMin = latitude - 0.0045;
+        double latitudeMax = latitude + 0.0045;
+        double longitudeMin = longitude - 0.0055;
+        double longitudeMax = longitude + 0.0055;
+
+        // 위도와 경도 범위 내의 식물 데이터를 검색
+        List<Plant> plants = plantRepository.findAllByLatitudeAndLongitudeRange(latitudeMin, latitudeMax, longitudeMin, longitudeMax);
+
+        // PlantName으로 그룹화하여 plantNameDTO 생성
+        Map<String, List<PlantResponse.plantSimpleDTO>> plantsGroupedByPlantName = plants.stream()
+                .collect(Collectors.groupingBy(
+                        Plant::getPlantName,
+                        Collectors.mapping(
+                                plant -> new PlantResponse.plantSimpleDTO(plant.getId(), plant.getLongitude(), plant.getLatitude()),
+                                Collectors.toList()
+                        )
+                ));
+
+        // 그룹화된 데이터를 기반으로 plantNameDTO 리스트 생성
+        List<PlantResponse.plantNameDTO> plantNameDTOList = plantsGroupedByPlantName.entrySet().stream()
+                .map(entry -> new PlantResponse.plantNameDTO(
+                        entry.getKey(),
+                        new PlantResponse.plantListDTO(entry.getValue()) // SimpleDTO 리스트를 plantListDTO에 담음
+                ))
+                .collect(Collectors.toList());
+
+        // 최종적으로 PlantNameListDTO 생성 및 반환
+        return new PlantResponse.plantNameListDTO(plantNameDTOList.size(), plantNameDTOList);
+    }
+
     public PlantResponse.plantSpecificInfoDTO savePlant(PlantRequest.PlantSaveDTO request) throws IOException {
         // 닉네임 null값 확인
         String nickName = request.getNickName()!=null ? request.getNickName() : "익명의 새싹";
