@@ -44,6 +44,25 @@ public class PlantService {
 
     }
 
+    public List<PlantResponse.plantSpecificInfoDTO> getPlantListWithNickName(String nickname){
+        List<PlantResponse.plantSpecificInfoDTO> plantSpecificInfoDTOList = plantRepository.findAllByNickName(nickname).stream()
+                .map(plant -> PlantResponse.plantSpecificInfoDTO.builder()
+                        .id(plant.getId())
+                        .plantDescription(plant.getPlantDescription())
+                        .plantName(plant.getPlantName())
+                        .disease(plant.getDisease())
+                        .nickName(plant.getNickName())
+                        .imageDirectory(plant.getImageDirectory())
+                        .isPlant(plant.isPlant())
+                        .isHealthy(plant.isHealthy())
+                        .longitude(plant.getLongitude())
+                        .latitude(plant.getLatitude())
+                        .build())
+                .collect(Collectors.toList());
+        return plantSpecificInfoDTOList;
+
+    }
+
     public PlantResponse.plantSpecificInfoDTO savePlant(PlantRequest.PlantSaveDTO request) throws IOException {
         // 닉네임 null값 확인
         String nickName = request.getNickName()!=null ? request.getNickName() : "익명의 새싹";
@@ -66,7 +85,7 @@ public class PlantService {
 
         plantRepository.save(plant);
 
-        String s = fileService.saveBase64File(request.getImageData(), nickName);
+//        String s = fileService.saveBase64File(request.getImageData(), nickName);
 
         return PlantResponse.plantSpecificInfoDTO.builder()
                 .id(plant.getId())

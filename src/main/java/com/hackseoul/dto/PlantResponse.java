@@ -45,6 +45,14 @@ public class PlantResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class plantUsernameListDTO{
+        private List<plantSpecificInfoDTO> plantListsDTO;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class plantSimpleDTO{
         private Long id;
         private double longitude;

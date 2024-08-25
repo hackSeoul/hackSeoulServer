@@ -45,6 +45,15 @@ public class PlantController {
                 .build());
     }
 
+    @GetMapping("/nickName/{nickName}")
+    @Operation(summary = "특정 사용자의 식물 리스트 조회하는 API입니다.", description = "전체 식물 리스트를 조회하는 API입니다.")
+    public ApiResponse<PlantResponse.plantUsernameListDTO> getPlantWithUsername(@PathVariable String nickName){
+        List<PlantResponse.plantSpecificInfoDTO> plantListWithNickName = plantService.getPlantListWithNickName(nickName);
+        return ApiResponse.onSuccess(PlantResponse.plantUsernameListDTO.builder()
+                .plantListsDTO(plantListWithNickName)
+                .build());
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "id를 활용해 특정 식물을 조회하는 API입니다.",description = "id를 입력하세요....")
     public ApiResponse<PlantResponse.plantSpecificInfoDTO> getSpecificPlant(@PathVariable long id){
