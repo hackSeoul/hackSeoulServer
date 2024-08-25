@@ -72,7 +72,7 @@ public class PlantService {
         // 위도와 경도 범위 내의 식물 데이터를 검색
         List<Plant> plants = plantRepository.findAllByLatitudeAndLongitudeRange(latitudeMin, latitudeMax, longitudeMin, longitudeMax);
 
-        // PlantName으로 그룹화하여 plantNameDTO 생성
+        /// PlantName으로 그룹화하여 plantNameDTO 생성
         Map<String, List<PlantResponse.plantSimpleDTO>> plantsGroupedByPlantName = plants.stream()
                 .collect(Collectors.groupingBy(
                         Plant::getPlantName,
@@ -86,7 +86,7 @@ public class PlantService {
         List<PlantResponse.plantNameDTO> plantNameDTOList = plantsGroupedByPlantName.entrySet().stream()
                 .map(entry -> new PlantResponse.plantNameDTO(
                         entry.getKey(),
-                        new PlantResponse.plantListDTO(entry.getValue()) // SimpleDTO 리스트를 plantListDTO에 담음
+                        entry.getValue()  // SimpleDTO 리스트를 plantListsDTO에 직접 담음
                 ))
                 .collect(Collectors.toList());
 

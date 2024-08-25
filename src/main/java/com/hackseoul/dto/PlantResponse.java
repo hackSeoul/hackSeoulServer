@@ -56,9 +56,8 @@ public class PlantResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class plantNameDTO{
-        String plantName;
-        plantListDTO plantListDTO;
-    }
+        private String plantName;
+        private List<plantSimpleDTO> plantListsDTO;    }
 
 
     @Builder
