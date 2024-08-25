@@ -116,7 +116,7 @@ public class PlantService {
 
         plantRepository.save(plant);
 
-//        String s = fileService.saveBase64File(request.getImageData(), nickName);
+        String s = fileService.saveBase64File(request.getImageData(), nickName);
 
         return PlantResponse.plantSpecificInfoDTO.builder()
                 .id(plant.getId())

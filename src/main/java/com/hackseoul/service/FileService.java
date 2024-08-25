@@ -19,35 +19,32 @@ public class FileService {
         String base64Prefix = "data:image/jpg;base64,";
         String substring = base64Data.substring(base64Prefix.length());
 
-        // Base64 디코딩
+        // Base64 decoding
         byte[] decodedBytes = Base64Utils.decodeFromString(substring);
 
-        // 파일 확장자 추출
-        String extension = "";
-        int i = originalFileName.lastIndexOf('.');
-        if (i > 0) {
-            extension = originalFileName.substring(i);
-        }
+        // Set the file extension to .png
+        String extension = ".png";
 
-        // 고유한 파일 이름 생성 (UUID 사용)
+        // Generate a unique file name using UUID and the .png extension
         String uniqueFileName = UUID.randomUUID().toString() + extension;
 
-        // 파일 저장 경로 설정
+        // Define the file save path
         Path path = Paths.get(UPLOAD_DIR + uniqueFileName);
         File file = path.toFile();
 
-        // 디렉토리 생성
+        // Create the directory if it doesn't exist
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
 
-        // 파일에 데이터 쓰기
+        // Write data to the file
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(decodedBytes);
         }
 
-        // 저장된 파일 경로 반환
+        // Return the absolute path of the saved file
         return path.toAbsolutePath().toString();
     }
+
 }
 
